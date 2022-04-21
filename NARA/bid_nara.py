@@ -41,7 +41,7 @@ try:
     results = []  # 결과값을 저장할 리스트를 미리 만든다
 
     #query2_list = ['1162','1164','1260','1468','1426']
-    query2_list = ['1162','1164','1260']  #소프트웨어  
+    query2_list = ['1162','1164','1260','1426','1468']  #소프트웨어  
     for query2 in query2_list:
         #업종선택
         search_button = driver.find_element_by_xpath('//*[@id="search"]/table/tbody/tr[7]/td[1]/div/button[1]')
@@ -75,24 +75,21 @@ try:
             div_list = elem.find_elements_by_tag_name('div')
 
             #검색결과 리스트로 저장
+
             for div in div_list:
                 results.append(div.text)
-                kk = len(results)
-                if kk % 12 == 0 :
-                    results.append(query2)
-                    results.append(area)
-                  
-
-                # elif kk % 12 == 0 :
-                #      results.append(query2)
-                #      results.append(area)
-                                      
-
+ 
                 # a_tags = div.find_elements_by_tag_name('a')
                 # if a_tags:
                 #     for a_tag in a_tags:
                 #         link = a_tag.get_attribute('href')
-                #         results.append(link)          
+                #         results.append(query2)     
+
+                kk = len(results) + 2
+                if kk % 12 == 0 :
+                    results.append(query2)
+                    results.append(area) 
+                    kk += 1    
 
             # 검색건수가 100건초과시 클릭
             inforight = driver.find_element_by_class_name('inforight')
@@ -118,18 +115,16 @@ try:
                     #검색결과 리스트로 저장 
                     for div in div_list:
                         results.append(div.text)
-                        
-                        jj = len(results)
-                        if jj % 12 == 0:
-                            results.append(query2)
-                            results.append(area)
-                         
-                            
                         # a_tags = div.find_elements_by_tag_name('a')
                         # if a_tags:
                         #     for a_tag in a_tags:
                         #         link = a_tag.get_attribute('href')
-                        #         results.append(link)          
+                        #         results.append(query2)   
+                        jj = len(results) + 2
+                        if jj % 12 == 0:
+                            results.append(query2)
+                            results.append(area)                     
+                            jj += 1
 
             # 검색화면으로 이동
             search_button = driver.find_element_by_class_name('btn_mdl')
