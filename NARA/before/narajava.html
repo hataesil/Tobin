@@ -1,0 +1,1136 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+
+
+
+
+<title>입찰정보 검색</title>
+
+
+
+<link rel="stylesheet" type="text/css" href="/gov/koneps/co/css/body.css" />
+<link rel="stylesheet" type="text/css" href="/gov/koneps/co/css/width.css" />
+<!--[if IE]>
+<link rel="stylesheet" type="text/css" href="/gov/koneps/co/css/ie.css" />
+<![endif]-->
+<!--[if IE 8]>
+<link rel="stylesheet" type="text/css" href="/gov/koneps/co/css/ie8.css" />
+<![endif]-->
+<!--[if IE 7]>
+<link rel="stylesheet" type="text/css" href="/gov/koneps/co/css/ie7.css" />
+<![endif]-->
+<!--[if IE 6]>
+<link rel="stylesheet" type="text/css" href="/gov/koneps/co/css/ie6.css" />
+<script src="/gov/koneps/co/js/png_ie6.js" type="text/livescript"></script>
+<script language="javascript" type="text/javascript">
+//<![CDATA[
+DD_belatedPNG.fix('.png, .win, .btn_mdl, .btn_view, span, strong, img, li');  // png 이미지 적용
+//]]>
+</script>
+<![endif]-->
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/gov/koneps/co/js/crossDomain.js"></script>
+<script type="text/javascript" src="/gov/koneps/co/js/popup.js"></script>
+<script type="text/javascript" src="/gov/koneps/co/js/util.js"></script>
+
+
+<script type="text/javascript" src="/gov/koneps/co/js/datepicker.js"></script>
+<script type="text/javascript" src="/gov/koneps/ep/tbid/js/tbidBanner.js"></script>
+
+
+<script type="text/javascript" src="/gov/koneps/co/js/commonPopup.js?1642768863401"></script>
+<script type="text/javascript" src="/gov/koneps/ep/co/js/simulateBidding.js"></script>
+<script type="text/javascript" src="/gov/koneps/ep/helpmsg/tbid/tbidSrch.js?1642768863401"></script>
+<script type="text/javascript" src="/gov/koneps/ep/co/js/dateVaildator.js"></script>
+<script type="text/javascript" src="/gov/koneps/co/js/ajax.js"></script>
+<script type="text/javascript" src="/gov/koneps/ep/co/js/bidUtil.js?1642768863401"></script>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function(){
+	$('head').append(
+		$(document.createElement('script')).attr({
+			'type' : "text/javascript",
+			'src' : "/gov/koneps/ep/co/js/wz_tooltip2.js"
+		})
+	);
+});
+
+// 한달 이후 날짜 세팅
+function doGetNextMonth(obj_day){
+
+	var	currentDay=obj_day.value;
+
+	sendRequest("/ep/co/calcDayTime.do",
+    			"currentDay="+currentDay+"&incrementDayInt=30",
+                pollCallbackGetNextMonth,
+                "GET");
+}
+
+// NextMonth 받아서 날짜 세팅
+function pollCallbackGetNextMonth(){
+
+	if (xmlHttp.readyState == 4) {
+        if (xmlHttp.status == 200) {
+          var nextDay = "";
+
+          try{
+        	  nextDay = xmlHttp.responseXML.getElementsByTagName("result")[0].firstChild.data;
+
+        	  var sel = document.getElementById("searchDtType").value;
+
+        	  if(sel=="1"){//공고검색
+        		  document.search.toBidDt.value=nextDay;
+        	  }else{	// 개찰일시
+        		  document.search.toOpenBidDt.value=nextDay;
+        	  }
+
+            }catch(e){}
+        }
+	}
+}
+
+
+// 공고일/개찰일 선택
+function selectChange(){
+	// mas는 게시일시로만 검색하게 한다.
+	if(document.search.isMas.checked){
+		if(document.getElementById("searchDtType").value == '2'){
+			alert('다수공급자물품계약인 공고는 공고일 기준으로만 검색 가능합니다.');
+			document.search.searchDtType[0].selected="selected";
+			return;
+		}
+	}
+
+	var noticedate	= document.getElementById("noticedate");
+	var opendate1	= document.getElementById("opendate1");
+	var opendate2	= document.getElementById("opendate2");
+	var sel = document.getElementById("searchDtType").value;
+
+	if(sel=="2"){ // 개찰일
+		if(document.search.bidSearchType[0].checked == true){	//공고검색
+			noticedate.style.display="none";
+			noticedate1.style.display="none";
+			noticedate2.style.display="none";
+			opendate.style.display="";
+			opendate1.style.display="";
+			opendate2.style.display="none";
+		} else if(document.search.bidSearchType[1].checked == true || document.search.bidSearchType[2].checked == true){ // 개찰결과, 최종낙찰자 검색
+			noticedate.style.display="none";
+			noticedate1.style.display="none";
+			noticedate2.style.display="none";
+			opendate.style.display="";
+			opendate1.style.display="none";
+			opendate2.style.display="";
+		}
+
+		document.search.fromBidDt.value = "";
+		document.search.toBidDt.value = "";
+		document.search.fromOpenBidDt.value = '2022/01/07';
+		document.search.toOpenBidDt.value = '2022/02/06';
+	}else{	// 공고일
+		if(document.search.bidSearchType[0].checked == true){ //공고검색
+			noticedate.style.display="";
+			noticedate1.style.display="";
+			noticedate2.style.display="none";
+			opendate.style.display="none";
+			opendate1.style.display="none";
+			opendate2.style.display="none";
+		} else if(document.search.bidSearchType[1].checked == true || document.search.bidSearchType[2].checked == true){ // 개찰결과, 최종낙찰자 검색
+			noticedate.style.display="";
+			noticedate1.style.display="none";
+			noticedate2.style.display="";
+			opendate.style.display="none";
+			opendate1.style.display="none";
+			opendate2.style.display="none";
+		}
+
+		document.search.fromBidDt.value = '2021/12/22';
+		document.search.toBidDt.value = '2022/01/21';
+		document.search.fromOpenBidDt.value = "";
+		document.search.toOpenBidDt.value = "";
+	}
+
+	if(document.search.bidSearchType[0].checked == true){
+		document.search2.bidSearchType.options[0].selected = true;
+		document.search.exceptEnd.disabled = false;
+	} else if(document.search.bidSearchType[1].checked == true){
+		document.search2.bidSearchType.options[1].selected = true;
+		document.search.exceptEnd.checked = false;
+		document.search.exceptEnd.disabled = true;
+	} else if(document.search.bidSearchType[2].checked == true){
+		document.search2.bidSearchType.options[2].selected = true;
+		document.search.exceptEnd.checked = false;
+		document.search.exceptEnd.disabled = true;
+	}
+}
+
+function selectSearchDtType(){
+	var searchNotice1 = document.getElementById("searchNotice1");
+	var searchNotice2 = document.getElementById("searchNotice2");
+	if(document.search.bidSearchType[0].checked == true){
+		document.search.searchDtType[0].selected="selected";
+		searchNotice1.style.display = "";
+		searchNotice2.style.display = "none";
+	}
+	if(document.search.bidSearchType[1].checked == true || document.search.bidSearchType[2].checked == true){
+		document.search.searchDtType[1].selected="selected";
+		searchNotice1.style.display = "none";
+		searchNotice2.style.display = "";
+	}
+
+	// 개찰결과 선택시만 기타업무 검색 못하게 처리
+	if(document.search.bidSearchType[1].checked == true){
+		document.getElementsByName("taskClCds")[7].disabled = true;
+	} else {
+		document.getElementsByName("taskClCds")[7].disabled = false;
+	}
+
+	selectChange();
+}
+
+function toSearch(){
+
+	// 검색기간 체크
+	if(document.search.searchDtType.value == "1"){
+		if(!dateVaildation(document.search.fromBidDt, document.search.toBidDt, '공고일', true, '184')){
+			return;
+		}
+		// 검색건수 표시 이용시 검색기간은 1개월
+		var period = util_getDateInterval(document.search.fromBidDt, document.search.toBidDt, "공고일");
+		if(document.search.useTotalCount.checked == true && period > 30){
+			alert('검색건수 표시 이용시 검색기간은 1개월입니다. 검색기간을 조정하십시오.');
+			return;
+		}
+		//if(util_checkDateFromToMust(document.search.fromBidDt, document.search.toBidDt, "공고일 검색기간") == false){
+		//	return;
+		//}
+	} else {
+		if(!dateVaildation(document.search.fromOpenBidDt, document.search.toOpenBidDt, '개찰일', true, '184')){
+			return;
+		}
+		// 검색건수 표시 이용시 검색기간은 1개월
+		var period = util_getDateInterval(document.search.fromOpenBidDt, document.search.toOpenBidDt, "개찰일");
+		if(document.search.useTotalCount.checked == true && period > 30){
+			alert('검색건수 표시 이용시 검색기간은 1개월입니다. 검색기간을 조정하십시오.');
+			return;
+		}
+		//if(util_checkDateFromToMust(document.search.fromOpenBidDt, document.search.toOpenBidDt, "개찰일 검색기간") == false){
+		//	return;
+		//}
+	}
+
+	// 예산액 콤마 제거
+	deleteComma(document.search.budget);
+
+	if(document.search.bidNm.value == '공고명을 입력하세요'){
+		document.search.bidNm.value = "";
+	}
+
+	if(document.search.searchDtType.value == '1'){
+		document.search.fromOpenBidDt.value = "";
+		document.search.toOpenBidDt.value = "";
+	} else {
+		document.search.fromBidDt.value = "";
+		document.search.toBidDt.value = "";
+	}
+
+	// 세부품명번호가 입력되었을 경우
+	if(document.search.detailPrdnmNo.value != ""){
+		if(!(document.search.detailPrdnmNo.value.length == 6
+		|| document.search.detailPrdnmNo.value.length == 8
+		|| document.search.detailPrdnmNo.value.length == 10)){
+			alert("세부품명번호는 6자리, 8자리, 10자리 단위로 입력하세요.");
+			document.search.detailPrdnmNo.focus();
+			return;
+		}
+	}
+
+
+	//기관명 특정 기관만 검색 체크박스 확인
+	if(document.search.radOrgan[0].checked == true){
+		if(document.getElementById("instSearchRangeType").value != "1"){
+			if(document.getElementById("instSearchRange").checked == true){
+				alert("해당 기관명이 포함된 전체 기관을 검색합니다. 특정 기관만 검색하려면 돋보기 버튼을 통하여 기관명을 선택하십시오.");
+				//document.getElementById("instSearchRange").checked = false;
+				document.getElementById("instSearchRange").value = "";
+			}
+		}
+	}
+
+	// 지역 확인
+	document.search.orgArea.value = $("#area option:selected").val();
+	var A = $("#area option:selected").val();
+	var B = A.length;
+	var C = A.substr(3,1);
+	var D = A.substr(4,1);
+
+	for (var i = 0; i < 10; i++){
+		if (A % 10 == 0){
+			A = A.substring(0, B);
+			B--;
+		}
+	}
+
+	if(areaExistsYn(document.search.orgArea.value) == "Y"){
+		A = document.search.orgArea.value;
+	}
+
+	if (A.length == 1){				// 2007-08-23
+		A = A +"0";					// 2007-08-23
+	}								// 2007-08-23
+	if (A.length == 3){				// 2007-08-23
+		A = A + C;					// 2007-08-23
+	}								// 2007-08-23
+	if (C == 0 && A.length == 4){	// 2007-09-17
+		A = A + D;					// 2007-08-23
+	}								// 2007-08-23
+
+	document.search.strArea.value = A;
+
+	var searchUrl = "";
+	if(document.search.bidSearchType[0].checked == true){
+		searchUrl = "/ep/tbid/tbidList.do";
+	} else if(document.search.bidSearchType[1].checked == true){
+		searchUrl = "/ep/result/listPageIntegrationBidResult.do";
+	} else if(document.search.bidSearchType[2].checked == true){
+		searchUrl = "/ep/tbid/integrationWbidderList.do";
+	} else {
+		return;
+	}
+
+	document.search.method = "get";
+	document.search.action = searchUrl;
+	document.search.submit();
+}
+
+function toSearch2(){
+	if(document.search2.bidno.value == ''){
+		alert('입찰공고번호를 입력하십시오.');
+		document.search2.bidno.focus();
+		return;
+	}
+
+	if(document.search2.bidno.value.length < 6){
+		alert('입찰공고번호를 6자리 이상 입력하십시오.');
+		document.search2.bidno.focus();
+		return;
+	}
+
+	var searchUrl = "";
+	if(document.search2.bidSearchType.value == '1'){
+		searchUrl = "/ep/tbid/tbidList.do";
+	} else if(document.search2.bidSearchType.value == '2'){
+		searchUrl = "/ep/result/listPageIntegrationBidResult.do";
+	} else if(document.search2.bidSearchType.value == '3'){
+		searchUrl = "/ep/tbid/integrationWbidderList.do";
+	} else {
+		return;
+	}
+
+	document.search2.method = "post";
+	document.search2.action = searchUrl;
+	document.search2.submit();
+}
+
+function search3(fpYn, taskCl) {
+	if(fpYn == 'Y'){
+		document.search2.bidno.value=getFingerPrintTestGonggo(taskCl);
+	} else {
+		document.search2.bidno.value=getSimulateGongnum(taskCl);
+	}
+
+	document.search2.method="post";
+	document.search2.action="/ep/tbid/tbidList.do";
+	document.search2.submit();
+}
+
+function setNoticeDateField1(arg_beforeDate){
+	document.search.fromBidDt.value = arg_beforeDate;
+	document.search.toBidDt.value = '2022/01/21';
+
+	document.search.fromOpenBidDt.value = arg_beforeDate;
+	document.search.toOpenBidDt.value = '2022/01/21';
+}
+
+function setNoticeDateField2(arg_beforeDate){
+	document.search.fromBidDt.value = '2022/01/21';
+	document.search.toBidDt.value = arg_beforeDate;
+
+	document.search.fromOpenBidDt.value = '2022/01/21';
+	document.search.toOpenBidDt.value = arg_beforeDate;
+}
+
+function changeArea(arg){
+	var form = document.search;
+
+	if(arg=="임시"){
+		alert("참가제한지역은 빈칸을 선택할 수 없습니다. 다시 선택하시기 바랍니다.");
+		form.area[0].selected=true;
+		form.area.focus();
+		return;
+	}
+}
+
+//기관코드검색 Callback
+function callback_publicInst(aParam) {
+	if(aParam["popId"] == "pubOrg_001") {
+		//document.search.orderInstCd.value=aParam["instCd"];
+		document.search.instNm.value=aParam["instFullNm"];
+		document.getElementById("instSearchRangeType").value = "1";
+	}
+}
+
+function delInst() {
+	document.search.instNm.value="";
+	//document.search.orderInstCd.value="";
+}
+
+//지역검색 팝업 callback
+function callback_area(aParam){
+	var lastIdx = document.search.area.options.length-1;
+	if(aParam["popId"] == 'area_001'){
+		document.search.area[lastIdx].value = aParam["areaCd"];
+		document.search.area[lastIdx].text = aParam["areaNm"];
+		document.search.area[lastIdx].selected = true;
+		document.search.areaNm.value = aParam["areaNm"];
+	}
+}
+
+//업종사항 찾기 Callback
+function callback_industrial(aParam) {
+	if(aParam["popId"] == "industrial_001"){
+		document.search.industryCd.value=aParam["industrialCd"];
+		document.search.industry.value=aParam["industrialNm"];
+	}
+}
+
+function delIndustrial() {
+	document.search.industryCd.value="";
+	document.search.industry.value="";
+}
+
+//세부품명번호 검색 Callback
+function callback_prodCate(aParam){
+	if(aParam["popId"] == "prodCate_001"){
+		document.search.detailPrdnmNo.value = aParam['detailPrdnmNo'];
+		document.search.detailPrdnm.value = aParam['detailPrdnm'];
+	}
+}
+
+function delProdcate() {
+	document.search.detailPrdnmNo.value="";
+	document.search.detailPrdnm.value="";
+}
+
+function insertComma(obj_cost){
+
+	if(util_isNullSpace(obj_cost.value)==true){
+		return;
+	}
+
+	if(util_checkOnlyNumber(obj_cost)){
+
+		if(eval(obj_cost.value)==0){
+			alert("추정가격 검색조건 이용시 0 원은 입력할 수 없습니다.");
+			obj_cost.focus();
+			return;
+		}
+
+		document.search.budget.value=strInsertComma(obj_cost.value,15,0);
+	}
+}
+function deleteComma(cost){
+	document.search.budget.value=strDeleteComma(cost.value,15,0);
+}
+
+function strInsertComma(str,num1,num2) {
+    if(num1 == null){
+        num1 = 15;
+    }
+    if(num2 == null){
+        num2 = 3;
+    }
+
+    var buffer="";
+    var str=strDeleteComma(str,num1,num2);
+    var resultValue = str.split('.');
+    var num;
+
+    if(resultValue.length == 2) num = resultValue[0];
+    else num = str;
+
+    for(var i = 0 ; i < num.length ; i ++ ) {
+        if(num.charAt(i) <= '9' && num.charAt(i) >= '0') {
+            buffer =buffer + num.charAt(i);
+            if(((num.length-i+1)%3) == 2 && i != num.length-1) buffer =buffer+",";
+        } else if(num.charAt(i) != ',') {
+            alert("숫자만 입력하세요");
+            return;
+        }
+    }
+    if(resultValue.length == 2) str=buffer +'.'+ resultValue[1];
+    else str = buffer;
+	return str;
+}
+
+function strDeleteComma(str,num1,num2) {
+    if(num1 == null)
+        num1 = 15;
+    if(num2 == null)
+        num2 = 3;
+
+	var num = String(str);
+    var buffer="";
+
+    for(var i = 0 ; i < num.length ; i ++ ) {
+        if(num.charAt(i) != ",") {
+            if(buffer==null) buffer = num.charAt(i);
+            else buffer =buffer + num.charAt(i);
+		}
+    }
+	var resultValue = buffer.split('.');
+	if((resultValue[0]==null)||(resultValue[0]=="")){
+		buffer="0." + resultValue[0];
+	}
+	if((resultValue[1]==null)||(resultValue[1]=="")){
+		buffer=resultValue[0];
+	}
+    return buffer;
+}
+
+function favoritebid(){
+	top.location.href = "https://www.g2b.go.kr/pt/menu/selectSubFrame.do?framesrc=/pt/menu/frameMypage.do?url=https://www.g2b.go.kr/pt/bid/listInterestBid.do";
+}
+
+function reset(){
+	document.search.taskClCds[0].selected="selected";
+	document.search.bidNm.value="";
+	document.search.instNm.value="";
+	document.search.refNo.value="";
+	document.search.area[0].selected="selected";
+	document.search.exceptEnd.checked=false;
+	document.search.recordCountPerPage[0].selected="selected";
+	document.search.industry.value="";
+	document.search.industryCd.value="";
+	document.search.budget.value="";
+	document.search.budgetCompare[0].selected="selected";
+	document.search.detailPrdnmNo.value="";
+	document.search.detailPrdnm.value="";
+	document.search.isMas.checked=false;
+	document.search.procmntReqNo.value="";
+	document.search.regYn[1].selected="selected";
+	document.search.intbidYn[0].selected="selected";
+}
+
+function resetTaskClCds(){
+	var taskClCds = document.getElementsByName("taskClCds");
+
+	// 전체일때
+	if(taskClCds[0].checked){
+		for(var i = 1 ; i < taskClCds.length ; i++){
+			taskClCds[i].checked = false;
+		}
+	}
+}
+
+function setTaskClCds(arg){
+	if(arg.checked){
+		document.getElementsByName("taskClCds")[0].checked = false;
+	}
+}
+
+function checkMas(){
+	if(document.search.isMas.checked){
+		if(document.getElementById("searchDtType").value == '2'){
+			alert('다수공급자물품계약인 공고는 공고일 기준으로만 검색 가능합니다.');
+			document.search.searchDtType[0].selected="selected";
+			selectChange();
+		}
+	}
+}
+
+function setSrchHistoryInfo(){
+	try{
+		// 업무
+
+
+		// 입찰공고 검색시
+
+		    document.search.bidSearchType[0].checked = "checked";
+		    selectSearchDtType();
+
+				document.getElementById("searchDtType")[0].selected="selected"; //확인
+				noticedate.style.display="";
+				noticedate1.style.display="";
+				noticedate2.style.display="none";
+				opendate.style.display="none";
+				opendate1.style.display="none";
+				opendate2.style.display="none";
+
+
+
+
+		// 개찰결과 검색시
+
+
+		// 낙찰자 검색시
+
+
+		// 공고일 검색범위
+		document.getElementById("fromBidDt").value = "2021/12/22";
+		document.getElementById("toBidDt").value = "2022/01/21";
+		document.getElementById("fromOpenBidDt").value = "2022/01/07";
+		document.getElementById("toOpenBidDt").value = "2022/02/06";
+
+
+	} catch(e){}
+}
+
+function setRadioBtn1(obj){
+	try{
+		if(document.getElementById("setMonth1_1").checked && (obj.value != '2021/12/22')){
+			document.getElementById("setMonth1_1").checked = false;
+		}
+		if(document.getElementById("setMonth1_2").checked && (obj.value != '2021/10/21')){
+			document.getElementById("setMonth1_2").checked = false;
+		}
+		if(document.getElementById("setMonth1_3").checked && (obj.value != '2021/07/21')){
+			document.getElementById("setMonth1_3").checked = false;
+		}
+		if(document.getElementById("setMonth1_4").checked && (obj.value != '2021/12/22')){
+            document.getElementById("setMonth1_4").checked = false;
+        }
+        if(document.getElementById("setMonth1_5").checked && (obj.value != '2021/11/21')){
+            document.getElementById("setMonth1_5").checked = false;
+        }
+        if(document.getElementById("setMonth1_6").checked && (obj.value != '2021/10/21')){
+            document.getElementById("setMonth1_6").checked = false;
+        }
+	} catch(e){}
+}
+
+function setRadioBtn2(obj){
+	try{
+		if(document.getElementById("setMonth1_1").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth1_1").checked = false;
+		}
+		if(document.getElementById("setMonth1_2").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth1_2").checked = false;
+		}
+		if(document.getElementById("setMonth1_3").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth1_3").checked = false;
+		}
+		if(document.getElementById("setMonth1_4").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth1_4").checked = false;
+		}
+		if(document.getElementById("setMonth1_5").checked && (obj.value != '2022/01/21')){
+            document.getElementById("setMonth1_5").checked = false;
+        }
+        if(document.getElementById("setMonth1_6").checked && (obj.value != '2022/01/21')){
+            document.getElementById("setMonth1_6").checked = false;
+        }
+	} catch(e){}
+}
+
+function setRadioBtn3(obj){
+	try{
+		if(document.getElementById("setMonth2_1").checked && (obj.value != '2021/12/22')){
+			document.getElementById("setMonth2_1").checked = false;
+		}
+		if(document.getElementById("setMonth2_2").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth2_2").checked = false;
+		}
+		if(document.getElementById("setMonth2_3").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth2_3").checked = false;
+		}
+		if(document.getElementById("setMonth2_7").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth2_7").checked = false;
+		}
+		if(document.getElementById("setMonth2_4").checked && (obj.value != '2021/12/22')){
+			document.getElementById("setMonth2_4").checked = false;
+		}
+		if(document.getElementById("setMonth2_5").checked && (obj.value != '2021/11/21')){
+			document.getElementById("setMonth2_5").checked = false;
+		}
+		if(document.getElementById("setMonth2_6").checked && (obj.value != '2021/10/21')){
+			document.getElementById("setMonth2_6").checked = false;
+		}
+	} catch(e){}
+}
+
+function setRadioBtn4(obj){
+	try{
+		if(document.getElementById("setMonth2_1").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth2_1").checked = false;
+		}
+		if(document.getElementById("setMonth2_2").checked && (obj.value != '2022/02/20')){
+			document.getElementById("setMonth2_2").checked = false;
+		}
+		if(document.getElementById("setMonth2_3").checked && (obj.value != '2022/04/23')){
+			document.getElementById("setMonth2_3").checked = false;
+		}
+		if(document.getElementById("setMonth2_7").checked && (obj.value != '2022/07/24')){
+			document.getElementById("setMonth2_7").checked = false;
+		}
+		if(document.getElementById("setMonth2_4").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth2_4").checked = false;
+		}
+		if(document.getElementById("setMonth2_5").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth2_5").checked = false;
+		}
+		if(document.getElementById("setMonth2_6").checked && (obj.value != '2022/01/21')){
+			document.getElementById("setMonth2_6").checked = false;
+		}
+	} catch(e){}
+}
+
+function instSearchRangeCheck(cd){
+	if(document.getElementById("instSearchRangeType").value != "1"){
+		if(document.getElementById("instSearchRange").checked == true){
+			alert("돋보기 버튼을 통하여 기관 선택 후 이용하십시오.");
+		}
+	}
+}
+
+function bidClClick(cd){
+
+	document.getElementById("instSearchRangeCheckDiv").style.display="none";
+
+	if(cd == null || cd == ''){
+		cd = "1";
+	}
+
+	if(cd == '1'){
+		document.getElementById("instSearchRangeCheckDiv").style.display="inline";
+	}
+}
+
+function fnSetDisabled(){
+	document.getElementById("instSearchRangeType").value = "";
+}
+
+// 공고/개찰일 라디오버튼 초기화
+// 검색유형, 공고/개찰일 변경 시 라디오버튼이 이전에 선택된 상태로 유지되고 있었음.
+// 검색유형이 변경되거나 공고/개찰일 selectBox가 변경될 때 초기화 하도록 변경함.
+function radioReset() {
+	document.getElementById("setMonth1_1").checked = false;
+	document.getElementById("setMonth1_2").checked = false;
+	document.getElementById("setMonth1_3").checked = false;
+	document.getElementById("setMonth1_4").checked = false;
+	document.getElementById("setMonth1_5").checked = false;
+	document.getElementById("setMonth1_6").checked = false;
+
+	document.getElementById("setMonth2_1").checked = false;
+	document.getElementById("setMonth2_2").checked = false;
+	document.getElementById("setMonth2_3").checked = false;
+	document.getElementById("setMonth2_4").checked = false;
+	document.getElementById("setMonth2_5").checked = false;
+	document.getElementById("setMonth2_6").checked = false;
+	document.getElementById("setMonth2_7").checked = false;
+}
+//]]>
+</script>
+
+
+
+
+</head>
+
+<body onload="selectChange(); selectSearchDtType(); setSrchHistoryInfo();  bidClClick('');">
+
+
+
+<div id="content_wrap">
+
+    <div id="content_header">
+    	<h2>입찰정보 검색</h2>
+   		<div id='help'><button type='button' id='btn_help' title='새창열림' onclick="javascript:util_viewOnlineManual('/WEB-INF/jsp/ep/tbid/tbidSrch.jsp','','/WEB-INF/jsp/ep/tbid/tbidSrch.jsp','/ep/tbid/tbidFwd.do','null');"><span>온라인매뉴얼</span></button></div>
+    </div>
+
+
+
+    <div id="container">
+        <p class="btn_description dx"><a href="javascript:void(0);" class="desc_open"><span class="hide">설명글 열기/닫기</span></a></p>
+		<div class="description mdx2">
+			<ol>
+				<li>검색유형(입찰공고, 개찰결과, 최종낙찰자)별로 다양한 조건을 선택하여 입찰정보를 검색할 수 있으며, <span class="blue">검색유형은 반드시 한 개를 선택</span>하여야 합니다.</li>
+				<li>전체 업무를 선택하더라도, <span class="blue">특정 업무만 해당하는 검색조건(예 : 세부품명번호는 물품 업무만 해당) 선택시 해당 업무 입찰공고만 조회</span>됩니다.</li>
+				<li>재입찰기간이 긴 재입찰공고는 초기 개찰일자 검색조건으로 검색되지 않을 수 있으므로 개찰일자를 조정해 검색하시기 바랍니다.</li>
+				<li>민간입찰 공고중 아파트단지명으로 검색을 원할 경우, 기관명에 아파트단지명을 입력하여 검색하십시오.</li>
+			</ol>
+        </div>
+
+		<div class="inforight">
+		<!--
+
+			<a href="/gov/koneps/ep/html/bidList.html" id="safeg2bEve"><img src="/gov/koneps/ep/image/bu_safeg2bEve.png"/></a>
+
+		-->
+			<button type="button" class="btn_trialbid_fp" onclick="javascript:trialBidFp();" title="지문모의투찰"><span class="blind">지문모의투찰</span></button>
+			<button type="button" class="btn_trialbid" onclick="javascript:trialBid();" title="모의투찰"><span class="blind">모의투찰</span></button>
+			<!-- button type="button" class="btn_favoritebid" onclick="javascript:favoritebid();" title="관심입찰"><span class="blind">관심입찰</span></button -->
+		</div>
+
+        <div class="section">
+            <form name="search" id="search" method="post" action="javascript:toSearch();">
+            	<input type="hidden" name="searchType" id="searchType1" value="1"/>
+                <p class="hide">입찰정보 검색 : 검색유형, 업무, 공고명, 공고일, 개찰일, 기관명, 참조번호, 참가제한지역, 업종, 추정금액, 세부품명번호, 다수공급경쟁자 여부, 조달요청번호, 입찰마감제외 여부, 국내/국제구분, 공고종류, 목록수 항목으로 입찰정보 검색</p>
+                <table class="table_info" summary="입찰정보 검색 조건 : 검색유형, 업무, 공고명, 공고/개찰일, 기관명, 참조번호, 참가제한지역, 업종, 추정ㅇ가격, 세부품명번호, 조달요청번호/PR No., 다수공급경쟁자 여부, 국내/국제구분, 공고종류, 목록수">
+
+
+                            <caption style="visibility:visible !important; overflow:hidden; border:0; margin:-1px !important; width:1px; height:1px !important; clip:rect(1px, 1px, 1px,1px); clip-path:inset(50%);"><span>입찰정보 검색 조건</span></caption>
+
+
+
+                    <colgroup>
+                    <col class="w18p" />
+                    <col class="w32p" />
+                    <col class="w18p" />
+                    <col class="w32p" />
+                    </colgroup>
+                    <tr class="mdx">
+                        <th><p>검색유형</p></th>
+                        <td colspan="3">
+                            <div class="tb_inner">
+	                            <input type="radio" name="bidSearchType" id="bidSearchType1" value="1" onclick="javascript:selectSearchDtType();radioReset();" checked="checked"/><label for="bidSearchType1">입찰공고</label>
+	                            <input type="radio" name="bidSearchType" id="bidSearchType2" value="2" onclick="javascript:selectSearchDtType();radioReset();" /><label for="bidSearchType2">개찰결과</label>
+	                            <input type="radio" name="bidSearchType" id="bidSearchType3" value="3" onclick="javascript:selectSearchDtType();radioReset();" /><label for="bidSearchType3">최종낙찰자</label>
+                            </div>
+						</td>
+                    </tr>
+                    <tr class="mdx">
+                        <th><p>업무</p></th>
+                        <td colspan="3">
+                        	<div class="tb_inner">
+	                            <input type="checkbox" name="taskClCds" id="taskClCds"   value=""   onclick="javascript:resetTaskClCds();" checked="checked" /><strong><label for="taskClCds">전체</label></strong>&nbsp;&nbsp;&nbsp;&nbsp;
+	                            <input type="checkbox" name="taskClCds" id="taskClCds1"  value="1"  onclick="javascript:setTaskClCds(this);"  /><label for="taskClCds1">물품</label>&nbsp;&nbsp;
+	                            <input type="checkbox" name="taskClCds" id="taskClCds3"  value="3"  onclick="javascript:setTaskClCds(this);"  /><label for="taskClCds3">공사</label>&nbsp;&nbsp;
+	                            <input type="checkbox" name="taskClCds" id="taskClCds5"  value="5"  onclick="javascript:setTaskClCds(this);"  /><label for="taskClCds5">용역</label>&nbsp;&nbsp;
+	                            <input type="checkbox" name="taskClCds" id="taskClCds6"  value="6"  onclick="javascript:setTaskClCds(this);"  /><label for="taskClCds6">리스</label>&nbsp;&nbsp;
+	                            <input type="checkbox" name="taskClCds" id="taskClCds2"  value="2"  onclick="javascript:setTaskClCds(this);"  /><label for="taskClCds2">외자</label>&nbsp;&nbsp;
+	                            <input type="checkbox" name="taskClCds" id="taskClCds11" value="11" onclick="javascript:setTaskClCds(this);"  /><label for="taskClCds11">비축</label>&nbsp;&nbsp;
+	                            <input type="checkbox" name="taskClCds" id="taskClCds4"  value="4"  onclick="javascript:setTaskClCds(this);"  /><label for="taskClCds4">기타</label>&nbsp;&nbsp;
+								<input type="checkbox" name="taskClCds" id="taskClCds20" value="20" onclick="javascript:setTaskClCds(this);"  /><label for="taskClCds20">민간</label>
+							</div>
+						</td>
+                    </tr>
+                    <tr>
+                        <th><p><label for="bidNm">공고명</label></p></th>
+                        <td colspan="3">
+                        	<div class="tb_inner">
+                            	<input type="text" id="bidNm" name="bidNm" maxlength="100" class="w350 mw98p" title="공고명" value="" />
+                            </div>
+						</td>
+                    </tr>
+                    <tr>
+                        <th><p><label for="searchDtType">공고/개찰일</label></p></th>
+                        <td colspan="3">
+                        	<div class="tb_inner">
+
+	                        	<div id="searchNotice1" style="display:none;"><p class="pl5 pb5">검색기간은 공고일자 최대 6개월, 개찰일자 최대 6개월까지 가능(단, 검색건수 표시 적용은 1개월까지만 가능)</p></div>
+	                        	<div id="searchNotice2" style="display:none;"><p class="pl5 pb5">검색기간은 공고일자 최대 3개월, 개찰일자 최대 3개월까지 가능(단, 검색건수 표시 적용은 1개월까지만 가능)</p></div>
+	                            <div class="fl vm in mt1">
+	                                <select id="searchDtType" name="searchDtType" onchange="javascript:selectChange();radioReset();">
+	                                    <option value="1" selected="selected">공고일</option>
+	                                    <option value="2" >개찰일</option>
+	                                </select>
+	                            </div>
+	                            <div class="fl vm in ml5">
+	                                <div id="noticedate" style="display:none;" class="fl vm">
+	                                    <input id="fromBidDt" name="fromBidDt" type="text" maxlength="10" class="dp_date" onblur="if(util_checkDate(this,'/') !=false){try{doGetNextMonth(this);}catch(e){}} setRadioBtn1(this);" title="공고게시시작일" value="2021/12/22"/>
+	                                    <button type="button" class="btn_datepicker" onclick="javascript:displayDp('fromBidDt');" title="공고게시시작일 선택"><span class="blind">공고게시시작일 선택</span></button>
+	                                    ~
+	                                    <input id="toBidDt" name="toBidDt" type="text" maxlength="10" class="dp_date" onblur="util_checkDate(this,'/'); setRadioBtn2(this);" title="공고게시종료일" value="2022/01/21"/>
+	                                    <button type="button" class="btn_datepicker" onclick="javascript:displayDp('toBidDt');" title="공고게시종료일 선택"><span class="blind">공고게시종료일 선택</span></button>
+	                                </div>
+									<div id="noticedate1" style="display:none;" class="fl vm mt3">
+	                                    <input type="radio" name="setMonth1" id="setMonth1_1" value="1"  onclick="setNoticeDateField1('2021/12/22');" />
+	                                    <label for="setMonth1_1">최근1개월</label>
+	                                    <input type="radio" name="setMonth1" id="setMonth1_2" value="2"  onclick="setNoticeDateField1('2021/10/21');" />
+	                                    <label for="setMonth1_2">최근3개월</label>
+	                                    <input type="radio" name="setMonth1" id="setMonth1_3" value="3"  onclick="setNoticeDateField1('2021/07/21');" />
+	                                    <label for="setMonth1_3">최근6개월</label>
+                                    </div>
+									<div id="noticedate2" style="display:none;" class="fl vm mt3">
+	                                    <input type="radio" name="setMonth1" id="setMonth1_4" value="4"  onclick="setNoticeDateField1('2021/12/22');" />
+	                                    <label for="setMonth1_4">최근1개월</label>
+	                                    <input type="radio" name="setMonth1" id="setMonth1_5" value="5"  onclick="setNoticeDateField1('2021/11/21');" />
+	                                    <label for="setMonth1_5">최근2개월</label>
+	                                    <input type="radio" name="setMonth1" id="setMonth1_6" value="6"  onclick="setNoticeDateField1('2021/10/21');" />
+	                                    <label for="setMonth1_6">최근3개월</label>
+                                    </div>
+	                                <div id="opendate" style="display:none;" class="fl vm">
+	                                    <input id="fromOpenBidDt" name="fromOpenBidDt" type="text" maxlength="10" class="dp_date" onblur="if(util_checkDate(this,'/') !=false){try{doGetNextMonth(this);}catch(e){}} setRadioBtn3(this);" title="개찰시작일" value="2022/01/07"/>
+	                                    <button type="button" class="btn_datepicker" onclick="javascript:displayDp('fromOpenBidDt');" title="개찰시작일 선택"><span class="blind">개찰시작일 선택</span></button>
+	                                    ~
+	                                    <input id="toOpenBidDt" name="toOpenBidDt" type="text" maxlength="10" class="dp_date" onblur="util_checkDate(this,'/'); setRadioBtn4(this);" title="개찰종료일" value="2022/02/06"/>
+	                                    <button type="button" class="btn_datepicker" onclick="javascript:displayDp('toOpenBidDt');" title="개찰종료일 선택"><span class="blind">개찰종료일 선택</span></button>
+	                                </div>
+	                                <div id="opendate1" style="display:none;" class="fl vm mt3">
+	                                    <input type="radio" name="setMonth2" id="setMonth2_1" value="1"  onclick="setNoticeDateField1('2021/12/22');" />
+	                                    <label for="setMonth2_1">최근1개월</label>
+	                                    <input type="radio" name="setMonth2" id="setMonth2_2" value="2"  onclick="setNoticeDateField2('2022/02/20');" />
+	                                    <label for="setMonth2_2">이후1개월</label>
+	                                    <input type="radio" name="setMonth2" id="setMonth2_3" value="3"  onclick="setNoticeDateField2('2022/04/23');" />
+	                                    <label for="setMonth2_3">이후3개월</label>
+	                                    <input type="radio" name="setMonth2" id="setMonth2_7" value="7"  onclick="setNoticeDateField2('2022/07/24');" />
+	                                    <label for="setMonth2_7">이후6개월</label>
+	                                </div>
+	                                <div id="opendate2" style="display:none;" class="fl vm mt3">
+	                                    <input type="radio" name="setMonth2" id="setMonth2_4" value="4"  onclick="setNoticeDateField1('2021/12/22');" />
+	                                    <label for="setMonth2_4">최근1개월</label>
+	                                    <input type="radio" name="setMonth2" id="setMonth2_5" value="5"  onclick="setNoticeDateField1('2021/11/21');" />
+	                                    <label for="setMonth2_5">최근2개월</label>
+	                                    <input type="radio" name="setMonth2" id="setMonth2_6" value="6"  onclick="setNoticeDateField1('2021/10/21');" />
+	                                    <label for="setMonth2_6">최근3개월</label><br/>
+	                                </div>
+	                            </div><br/><br/>
+                            	<input type="checkbox" id="exceptEnd" name="exceptEnd" value="Y" /><label for="exceptEnd">입찰마감건 제외</label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><p><label for="instNm">기관명</label></p></th>
+                        <td colspan="3">
+                        	<div class="tb_inner">
+	                        	<input type="radio" name="radOrgan" id="radOrgan1" value="1" checked="checked" onclick="javascript:bidClClick(this.value);"/>
+	                            <label for="radOrgan1">공고기관</label>
+	                            <input type="radio" name="radOrgan" id="radOrgan2" value="2"  onclick="javascript:bidClClick(this.value);"/>
+	                            <label for="radOrgan2">수요기관</label>
+	                            <input type="text" name="instNm" id="instNm" size="23" class="w152" value="" title="기관명" onblur="javascript:fnSetDisabled('instSearchRange');" />
+	                            <button type="button" class="btn_finder" onclick="javascript:popup_publicInstAndPrivateOfTbidSrch('pubOrg_001','', document.search.instNm.value);" title="기관검색 새창"><span class="blind">기관검색</span></button>
+
+	                            <div id="instSearchRangeCheckDiv" style="display:inline">
+	                            	<input type="checkbox" id="instSearchRange" name="instSearchRange" value="N"  onclick="javascript:instSearchRangeCheck(this.value);" /><label id ="instSearchRangeLabel" for="instSearchRange">특정 기관만 검색</label>
+	                            </div>
+
+	                            <input type="hidden" name="instSearchRangeType" id="instSearchRangeType" value=""/>
+	                            <button type="button" class="btn_help" title="도움말" onclick="javascript:tbidSrch_tooltipHelpMsg('기관명')"><span class="blind">도움말</span></button>
+	                        </div>
+						</td>
+                    </tr>
+                    <tr>
+                        <th><p><label for="refNo">참조번호</label></p></th>
+                        <td><div class="tb_inner"><input type="text" id="refNo" name="refNo" size="18" value="" maxlength="11" class="w135" title="참조번호는 각 수요기관에서 관리하는 공고번호입니다." /></div></td>
+                        <th><p><label for="area">참가제한지역</label></p></th>
+                        <td>
+                        	<div class="tb_inner">
+								<select id="area" title="참가제한지역" name="area" onchange="changeArea(this.value);">
+	<option selected="selected" value="" >전체</option>
+	<option value="00" >전국(제한없음)</option>
+	<option value="11" >서울</option>
+	<option value="26" >부산</option>
+	<option value="28" >인천</option>
+	<option value="27" >대구</option>
+	<option value="29" >광주</option>
+	<option value="30" >대전</option>
+	<option value="31" >울산</option>
+	<option value="36" >세종</option>
+	<option value="41" >경기</option>
+	<option value="42" >강원</option>
+	<option value="43" >충북</option>
+	<option value="44" >충남</option>
+	<option value="45" >전북</option>
+	<option value="46" >전남</option>
+	<option value="47" >경북</option>
+	<option value="48" >경남</option>
+	<option value="49" >제주</option>
+	<option value="임시" > </option>
+</select>
+
+                            	<input type="hidden" id="areaNm" name="areaNm" />
+                            	<input type="hidden" id="strArea" name="strArea" value="" title="참가제한지역검색조건"/>
+                            	<input type="hidden" id="orgArea" name="orgArea" value="" title="원참가제한지역"/>
+                            	<button type="button" class="btn_finder" onclick="javascript:popup_area('area_001','', '', '5');" title="참가제한지역검색 새창"><span class="blind">참가제한지역검색</span></button>
+								<button type="button" class="btn_help" title="도움말" onclick="javascript:tbidSrch_tooltipHelpMsg('참가제한지역')"><span class="blind">도움말</span></button>
+							</div>
+						</td>
+                    </tr>
+                    <tr>
+                        <th><p><label for="industry">업종</label></p></th>
+                        <td>
+                        	<div class="tb_inner">
+								<input class="bg i20" type="text" name="industry" id="industry" maxlength="100" value="" readonly='readonly'/>
+								<input type="hidden" id="industryCd" name="industryCd" value=""/>
+								<button type="button" class="btn_finder" onclick="javascript:popup_industrial('industrial_001', '', '', 'Y', '');" title="업종검색 새창"><span class="blind">업종검색</span></button>
+	                            <button type="button" class="btn_del" onclick="javascript:delIndustrial();" title="입력데이터 삭제"><span class="blind">입력데이터 삭제</span></button>
+							</div>
+						</td>
+                        <th><p><label for="budget">추정가격</label></p></th>
+                        <td>
+                        	<div class="tb_inner">
+	                        	<input id="budget" type="text" size="15" maxlength="15" value="" onblur="javascript:insertComma(this);" onfocus="javascript:deleteComma(this);" name="budget" style="text-align:right" title="추정가격기준으로 검색 가능합니다." />
+	                            <select id="budgetCompare" class="f1" name="budgetCompare" title="추정가격 이상/이하 선택">
+	                                <option value="UP" >이상</option>
+	                                <option value="DOWN" >이하</option>
+	                            </select>
+	                            <button type="button" class="btn_help" title="도움말" onclick="javascript:tbidSrch_tooltipHelpMsg('추정가격')"><span class="blind">도움말</span></button>
+	                        </div>
+						</td>
+                    </tr>
+                    <tr>
+                        <th><p><label for="detailPrdnmNo">세부품명번호</label></p></th>
+                        <td colspan="3">
+                        	<div class="tb_inner">
+	                            <div class="fl">
+	                                <input id="detailPrdnmNo" name="detailPrdnmNo" value="" class="i12" type="text" maxlength="10" onblur="javascript:util_checkOnlyNumber(this);" title="업무구분이 물품일 경우 입력하세요" />
+	                                <input id="detailPrdnm" name="detailPrdnm" value="" class="bg i20" type="text" maxlength="100" title="세부품명" readonly='readonly'/>
+	                                <button type="button" class="btn_finder" title="세부품명번호검색" onclick="javascript:popup_detailProdnm('prodCate_001',document.search.detailPrdnmNo.value, '', 'S');"><span class="blind">세부품명번호검색</span></button>
+	                                <button type="button" class="btn_del" onclick="javascript:delProdcate();" title="입력데이터 삭제"><span class="blind">입력데이터 삭제</span></button>
+	                                <button type="button" class="btn_help" title="도움말" onclick="javascript:tbidSrch_tooltipHelpMsg('세부품명번호')"><span class="blind">도움말</span></button>
+	                            </div>
+	                        </div>
+	                    </td>
+                    </tr>
+                    <tr>
+                        <th><p><label for="procmntReqNo">조달요청번호/PR No.</label></p></th>
+                        <td colspan="3">
+                        	<div class="tb_inner">
+                        		<input id="procmntReqNo" type="text" size="23" maxlength="60" name="procmntReqNo" value="" title="조달요청번호 혹은 PR No.를 입력하세요." />
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><p>다수공급경쟁자 여부</p></th>
+                        <td>
+                        	<div class="tb_inner">
+                        		<input type="checkbox" id="isMas" name="isMas" value="Y"  onclick="javascript:checkMas();" /><label for="isMas">다수공급경쟁자</label>
+                        		<button type="button" class="btn_help" title="도움말" onclick="javascript:tbidSrch_tooltipHelpMsg('다수공급경쟁자')"><span class="blind">도움말</span></button>
+                        	</div>
+                        </td>
+                        <th><p><label for="intbidYn">국내/국제구분</label></p></th>
+                        <td>
+                        	<div class="tb_inner">
+	                        	<select id="intbidYn" name="intbidYn">
+	                                <option value="" >전체 </option>
+	                                <option value="1" >국내</option>
+	                                <option value="2" >국제</option>
+	                            </select>
+	                    	</div>
+	                    </td>
+                    </tr>
+                    <tr>
+                        <th><p><label for="regYn">공고종류</label></p></th>
+                        <td>
+                        	<div class="tb_inner">
+		                        <select id="regYn" name="regYn">
+		                                <option value="" >전체</option>
+		                                <option value="Y" selected="selected">실공고</option>
+		                                <option value="N" >모의공고</option>
+		                        </select>
+		                	</div>
+		                </td>
+                        <th class="indent_text"><p><label for="recordCountPerPage">목록수</label></p></th>
+                        <td class="indent_text">
+                        	<div class="tb_inner">
+	                        	<select id="recordCountPerPage" name="recordCountPerPage">
+	                                <option value="10" >10</option>
+	                                <option value="20" >20</option>
+	                                <option value="30" selected="selected">30</option>
+	                                <option value="50" >50</option>
+	                                <option value="100" >100</option>
+								</select>
+								<input type="checkbox" id="useTotalCount" name="useTotalCount" value="Y" /><label for="useTotalCount">검색건수 표시</label>
+								<button type="button" class="btn_help" title="도움말" onclick="javascript:tbidSrch_tooltipHelpMsg('검색건수 표시')"><span class="blind">도움말</span></button>
+							</div>
+						</td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+		<div id="buttonwrap">
+			<div class="button4">
+				<a class="btn_mdl" href="javascript:toSearch();"><span>검색</span></a>
+				<a class="btn_mdl" href="javascript:reset();" title="검색조건을 초기화 합니다. 단, 검색유형과 업무는 초기화하지 않습니다."><span>초기화</span></a>
+			</div>
+		</div>
+
+		<form name="search2" id="search2" method="post" action="javascript:toSearch2();">
+		<div class="section mt20">
+			<p class="hide">입찰공고번호로 검색 : 검색유형, 입찰공고번호 제공</p>
+			<table class="table_info" summary="공고번호 검색 조건 : 입찰공고번호로 검색">
+
+
+						<caption style="visibility:visible !important; overflow:hidden; border:0; margin:-1px !important; width:1px; height:1px !important; clip:rect(1px, 1px, 1px,1px); clip-path:inset(50%);"><span>공고번호 검색 조건</span></caption>
+
+
+
+				<colgroup>
+	            <col class="w18p" />
+	            <col class="w82p" />
+	            </colgroup>
+				<tr>
+					<th><p><label for="bidno1">입찰공고번호로 검색</label></p></th>
+					<td>
+						<div class="tb_inner">
+							<div class="fr w385 mw98p"></div>
+							<div class="fl">
+			                    <input type="hidden" name="searchType" id="searchType2" value="2"/>
+								<select id="bidSearchType4" name="bidSearchType" title="검색유형">
+									<option value="1" selected="selected">입찰공고</option>
+									<option value="2" >개찰결과</option>
+									<option value="3" >최종낙찰자</option>
+								</select>
+								<input type="text" class="i15" name="bidno" id="bidno1" maxlength="11" value="" title="입찰공고번호" onblur="javascript:util_checkSpecial(this)" />
+							</div>
+							<a class="btn_mdl" href="javascript:toSearch2();" id="bt_search"><span>검색</span></a>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		</form>
+    </div>
+
+
+
+
+
+
+
+
+</div>
+</body>
+</html>
+<!--/WEB-INF/jsp/ep/tbid/tbidSrch.jsp
+/ep/tbid/tbidFwd.do-->
