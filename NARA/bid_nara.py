@@ -1,4 +1,4 @@
-#python 나라장터 입찰정보수집_20220210(ver_01)
+#python 나라장터 입찰정보수집_20220210(ver_01) 20220421(Renewal)
 from msilib.schema import CheckBox
 import chromedriver_autoinstaller
 from soupsieve import select
@@ -15,7 +15,7 @@ try:
     driver.get('https://www.g2b.go.kr:8101/ep/tbid/tbidFwd.do')
 
     #업무종류체크
-    task_dict = {'용역': 'taskClCds5', '민간': 'taskClCds20', '기타': 'taskClCds4'}
+    task_dict = {'용역': 'taskClCds5', '기타': 'taskClCds4', '민간': 'taskClCds20'}
     for task in task_dict.values():
         CheckBox = driver.find_element_by_id(task)
         CheckBox.click()
@@ -41,7 +41,7 @@ try:
     results = []  # 결과값을 저장할 리스트를 미리 만든다
 
     #query2_list = ['1162','1164','1260','1468','1426']
-    query2_list = ['1162','1164','1260','1426','1468']  #소프트웨어  
+    query2_list = ['1162','1164','1260','1426','1468']  
     for query2 in query2_list:
         #업종선택
         search_button = driver.find_element_by_xpath('//*[@id="search"]/table/tbody/tr[7]/td[1]/div/button[1]')
@@ -78,12 +78,6 @@ try:
 
             for div in div_list:
                 results.append(div.text)
- 
-                # a_tags = div.find_elements_by_tag_name('a')
-                # if a_tags:
-                #     for a_tag in a_tags:
-                #         link = a_tag.get_attribute('href')
-                #         results.append(query2)     
 
                 kk = len(results) + 2
                 if kk % 12 == 0 :
@@ -103,23 +97,15 @@ try:
                 for i in range(2,page+2):  
                     #페이지 맨 아래로 스크롤
                     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);") 
-                    #다음페이지 클릭
-                    xpath = '//*[@id="pagination"]/a['
-                    xpath += str(i)
-                    xpath += ']'
-                    page_link = driver.find_element_by_xpath(xpath).click() 
-
+                    driver.find_element_by_link_text(str(i)).click()  #다음페이지 선택
+                    
                     # 검색 결과 확인(변수지정)
                     elem = driver.find_element_by_class_name('results')
                     div_list = elem.find_elements_by_tag_name('div')
                     #검색결과 리스트로 저장 
                     for div in div_list:
                         results.append(div.text)
-                        # a_tags = div.find_elements_by_tag_name('a')
-                        # if a_tags:
-                        #     for a_tag in a_tags:
-                        #         link = a_tag.get_attribute('href')
-                        #         results.append(query2)   
+   
                         jj = len(results) + 2
                         if jj % 12 == 0:
                             results.append(query2)

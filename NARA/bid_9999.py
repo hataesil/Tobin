@@ -1,4 +1,4 @@
-#python 나라장터 입찰정보수집_20220210(ver_01)
+#python 나라장터 입찰정보수집_20220210(ver_01) 20220421(Renewal)
 from msilib.schema import CheckBox
 import chromedriver_autoinstaller
 from soupsieve import select
@@ -40,8 +40,8 @@ try:
 
     results = []  # 결과값을 저장할 리스트를 미리 만든다
 
-    #query2_list = ['1162','1164','1260']
-    query2_list = ['1162','1164','1260','1426','1468']  #소프트웨어  
+    #query2_list = ['1162','1164','1260','1468','1426']
+    query2_list = ['9999']   
     for query2 in query2_list:
         #업종선택
         search_button = driver.find_element_by_xpath('//*[@id="search"]/table/tbody/tr[7]/td[1]/div/button[1]')
@@ -75,13 +75,15 @@ try:
             div_list = elem.find_elements_by_tag_name('div')
 
             #검색결과 리스트로 저장
+
             for div in div_list:
                 results.append(div.text)
-                a_tags = div.find_elements_by_tag_name('a')
-                if a_tags:
-                    for a_tag in a_tags:
-                        link = a_tag.get_attribute('href')
-                        results.append(link)          
+
+                kk = len(results) + 2
+                if kk % 12 == 0 :
+                    results.append(query2)
+                    results.append(area) 
+                    kk += 1    
 
             # 검색건수가 100건초과시 클릭
             inforight = driver.find_element_by_class_name('inforight')
@@ -104,28 +106,32 @@ try:
                     # 검색 결과 확인(변수지정)
                     elem = driver.find_element_by_class_name('results')
                     div_list = elem.find_elements_by_tag_name('div')
-                    #검색결과 리스트로 저장
+                    #검색결과 리스트로 저장 
                     for div in div_list:
                         results.append(div.text)
-                        a_tags = div.find_elements_by_tag_name('a')
-                        if a_tags:
-                            for a_tag in a_tags:
-                                link = a_tag.get_attribute('href')
-                                results.append(link)          
+   
+                        jj = len(results) + 2
+                        if jj % 12 == 0:
+                            results.append(query2)
+                            results.append(area)                     
+                            jj += 1
 
             # 검색화면으로 이동
             search_button = driver.find_element_by_class_name('btn_mdl')
             search_button.click()
     #print(results, end=" " )
-    
+
     #검색결과 모음 리스트를 12개씩 분할 새로운 리스트 생성
     result = [results[i * 12:(i + 1) * 12] for i in range((len(results) + 11) // 12)]            
+    # print(results, end=" " )
 
     #pandas를 이용하여 결과 excel에 출력
-    df = pd.DataFrame(result,columns=['업무','공고번호','공고번호링크','분류','공고명','공고명링크','수요기관','공고기관','계약방법','입력일시','입찰마감일시','공동수급'])
-    df.to_excel(excel_writer = "D:\BID/bidlist_nara.xlsx")
+    df = pd.DataFrame(result,columns=['업무','공고번호','분류','공고명','수요기관','공고기관','계약방법','입력일시','입찰마감일시','공동도급','업종구분','지역제한'])
+    df.to_excel(excel_writer = "D:\BID/bidlist_9999.xlsx")
     print("time :", time.time() - start) #현재시각 - 시작시간
+
 except Exception as e:
-    print(e)    
+    print(e) 
+    print("time :", time.time() - start) #현재시각 - 시작시간   
 finally:
     driver.close()
