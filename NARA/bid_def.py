@@ -18,7 +18,7 @@ try:
     xldown = driver.find_element_by_id('btn_excel_down')
     xldown.click()
 
-    time.sleep(10)
+    time.sleep(5)
 
     print("time :", time.time() - start) #현재시각 - 시작시간
 
