@@ -4,7 +4,7 @@ chromedriver_autoinstaller.install()
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
-import time
+import time, os
 start = time.time()  #시작시간
 
 try:
@@ -19,6 +19,8 @@ try:
     xldown.click()
 
     time.sleep(5)
+
+    os.rename('C:/Users/USER/Downloads/입찰공고목록.xls','C:/Users/USER/Downloads/bid_def.xls')
 
     print("time :", time.time() - start) #현재시각 - 시작시간
 
