@@ -3,6 +3,7 @@ from msilib.schema import CheckBox
 import chromedriver_autoinstaller
 from soupsieve import select
 chromedriver_autoinstaller.install()
+from selenium.webdriver.common.by import By     #새롭게 추가
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
@@ -18,12 +19,12 @@ try:
     #업무종류체크
     task_dict = {'물품': 'bsnsDivCdSch1', '민간': 'bsnsDivCdSch4'}
     for task in task_dict.values():
-        CheckBox = driver.find_element_by_id(task)
+        CheckBox = driver.find_element(By.ID,task)
         CheckBox.click()
 
 
     # 출력목록수 50건 선택 (드롭다운)
-    recordcountperpage = driver.find_element_by_name('recordCountPerPage')
+    recordcountperpage = driver.find_element(By.NAME,'recordCountPerPage')
     selector = Select(recordcountperpage)
     selector.select_by_value('100')
     
@@ -31,17 +32,17 @@ try:
 
 
     # 검색 버튼 클릭
-    search_button = driver.find_element_by_class_name('btn_search')
+    search_button = driver.find_element(By.CLASS_NAME,'btn_search')
     search_button.click()
 
             # 검색 결과 확인
-    elem = driver.find_element_by_class_name('results')
-    td_list = elem.find_elements_by_tag_name('td')
+    elem = driver.find_element(By.CLASS_NAME,'results')
+    td_list = elem.find_elements(By.TAG_NAME,'td')
 
             #검색결과 리스트로 저장
     for td in td_list:
         results.append(td.text)
-        a_tags = td.find_elements_by_tag_name('a')
+        a_tags = td.find_elements(By.TAG_NAME,'a')
 
 
     #검색결과 모음 리스트를 12개씩 분할 새로운 리스트 생성

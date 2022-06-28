@@ -2,6 +2,7 @@
 import chromedriver_autoinstaller
 chromedriver_autoinstaller.install()
 from selenium import webdriver
+from selenium.webdriver.common.by import By     #새롭게 추가
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 import time, os
@@ -11,11 +12,11 @@ try:
     driver = webdriver.Chrome()
     driver.get('https://www.d2b.go.kr/psb/bid/serviceBidAnnounceList.do?key=32')
 
-    date_divs = driver.find_element_by_name('date_divs')
+    date_divs = driver.find_element(By.NAME,'date_divs')
     selector = Select(date_divs)
     selector.select_by_value('0')
 
-    xldown = driver.find_element_by_id('btn_excel_down')
+    xldown = driver.find_element(By.ID,'btn_excel_down')
     xldown.click()
 
     time.sleep(5)
