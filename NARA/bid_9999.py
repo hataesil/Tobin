@@ -120,7 +120,6 @@ try:
             # 검색화면으로 이동
             search_button = driver.find_element(By.CLASS_NAME,'btn_mdl')
             search_button.click()
-    #print(results, end=" " )
 
     #검색결과 모음 리스트를 12개씩 분할 새로운 리스트 생성
     result = [results[i * 12:(i + 1) * 12] for i in range((len(results) + 11) // 12)]            
