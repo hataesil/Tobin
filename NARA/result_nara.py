@@ -83,12 +83,12 @@ try:
 
             for div in div_list:
                 results.append(div.text)
-
-                kk = len(results) + 2
-                if kk % 12 == 0 :
-                    results.append(query2)
-                    results.append(area) 
-                    kk += 1    
+                # 용역구분과 지역구분 삽입
+                #kk = len(results) + 2
+                #if kk % 12 == 0 :
+                #    results.append(query2)
+                #    results.append(area) 
+                #    kk += 1    
 
             # 검색건수가 100건초과시 클릭
             inforight = driver.find_element(By.CLASS_NAME, 'inforight')
@@ -121,12 +121,12 @@ try:
             search_button = driver.find_element(By.CLASS_NAME,'button4') #'btn_mdl'
             search_button.click()
 
-    #검색결과 모음 리스트를 12개씩 분할 새로운 리스트 생성
-    result = [results[i * 13:(i + 1) * 13] for i in range((len(results) + 12) // 13)]            
+    #검색결과 모음 리스트를 11개씩 분할 새로운 리스트 생성
+    result = [results[i * 11:(i + 1) * 11] for i in range((len(results) + 10) // 11)]            
     # print(results, end=" " )
 
     #pandas를 이용하여 결과 excel에 출력
-    df = pd.DataFrame(result,columns=['업무','공고번호','재입찰','공고명','수요기관','개찰일시','참가수','낙찰예정자','투찰금액','투찰율','진행상황','지역제한','비고'])
+    df = pd.DataFrame(result,columns=['업무','공고번호','재입찰','공고명','수요기관','개찰일시','참가수','낙찰예정자','투찰금액','투찰율','진행상황'])
     df.to_excel(excel_writer = "D:\BID/resultlist_nara.xlsx")
     print("time :", time.time() - start) #현재시각 - 시작시간
 
