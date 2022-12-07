@@ -42,7 +42,7 @@ try:
     results = []  # 결과값을 저장할 리스트를 미리 만든다
 
     #query2_list = ['1162','1164','1260','1468','1426']
-    query2_list = ['1162','1164','1260','1426','1468']  
+    query2_list = ['1162','1164','1260'] #,'1426','1468' 
     for query2 in query2_list:
         #업종선택
         search_button = driver.find_element(By.XPATH, '//*[@id="search"]/table/tbody/tr[7]/td[1]/div/button[1]')
