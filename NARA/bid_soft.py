@@ -1,10 +1,12 @@
-#python 소포트웨어 수집
+#python 소포트웨어 수집  20230725(ver_02)
 from msilib.schema import CheckBox
-import chromedriver_autoinstaller
+#import chromedriver_autoinstaller
 from soupsieve import select
-chromedriver_autoinstaller.install()
-from selenium.webdriver.common.by import By     #새롭게 추가
+#chromedriver_autoinstaller.install()
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service #20230725
+from webdriver_manager.chrome import ChromeDriverManager #20230724
+from selenium.webdriver.common.by import By     #새롭게 추가
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 import pandas as pd
@@ -12,8 +14,8 @@ import time
 start = time.time()  #시작시간
 
 try:
-    driver = webdriver.Chrome()
-    #driver.get('https://www.g2b.go.kr:8101/ep/tbid/tbidFwd.do')
+    chrome_options = webdriver.ChromeOptions() #20230725
+    driver = webdriver.Chrome(service=Service(),options=chrome_options) #20230725
     driver.get('https://www.g2b.go.kr:8402/gtob/all/pr/estimate/fwdReqEstimateOpenCond.do')
 
     #업무종류체크
