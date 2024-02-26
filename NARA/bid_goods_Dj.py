@@ -12,7 +12,8 @@ start = time.time()  #시작시간
 
 try:
     chrome_options = webdriver.ChromeOptions() #20230725
-    driver = webdriver.Chrome(service=Service(),options=chrome_options) #20230725
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=chrome_options) #20230725
+    #driver = webdriver.Chrome(service=Service(),options=chrome_options) #20230725
     driver.get('https://www.d2b.go.kr/pdb/bid/goodsBidAnnounceList.do?key=129')
 
     query1 = "대전"   #소프트웨어 검색시 사용

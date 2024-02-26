@@ -1,5 +1,5 @@
 #python 나라장터 입찰정보수집_20220710(ver_01) 20230725(ver_02)
-from msilib.schema import CheckBox
+#from msilib.schema import CheckBox
 #import chromedriver_autoinstaller
 from soupsieve import select
 #chromedriver_autoinstaller.install()
@@ -15,7 +15,8 @@ start = time.time()  #시작시간
 
 try:
     chrome_options = webdriver.ChromeOptions() #20230725
-    driver = webdriver.Chrome(service=Service(),options=chrome_options) #20230725
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=chrome_options) #20230725
+    #driver = webdriver.Chrome(service=Service(),options=chrome_options) #20230725
     driver.get('https://www.g2b.go.kr:8101/ep/tbid/tbidFwd.do')
 
     #업무종류체크
@@ -110,7 +111,7 @@ try:
 
     #pandas를 이용하여 결과 excel에 출력
     df = pd.DataFrame(result,columns=['업무','공고번호','분류','공고명','수요기관','공고기관','계약방법','입력일시','입찰마감일시','공동도급','업종구분','지역제한'])
-    df.to_excel(excel_writer = "D:\BID/bidlist_goods.xlsx")
+    df.to_excel(excel_writer = "D:/BID/bidlist_goods.xlsx")
     print("time :", time.time() - start) #현재시각 - 시작시간
 
 except Exception as e:

@@ -1,21 +1,23 @@
 #python 소포트웨어 수집  20230725(ver_02)
-from msilib.schema import CheckBox
+#from msilib.schema import CheckBox #20231013 python 3.13이후에는 사용안함
 #import chromedriver_autoinstaller
-from soupsieve import select
+#from soupsieve import select #20231013
 #chromedriver_autoinstaller.install()
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service #20230725
 from webdriver_manager.chrome import ChromeDriverManager #20230724
 from selenium.webdriver.common.by import By     #새롭게 추가
-from selenium.webdriver.common.keys import Keys
+#from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 import pandas as pd
 import time
 start = time.time()  #시작시간
 
+
 try:
     chrome_options = webdriver.ChromeOptions() #20230725
-    driver = webdriver.Chrome(service=Service(),options=chrome_options) #20230725
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=chrome_options) #20230725
+    #driver = webdriver.Chrome(service=Service(),options=chrome_options) #20230725
     driver.get('https://www.g2b.go.kr:8402/gtob/all/pr/estimate/fwdReqEstimateOpenCond.do')
 
     #업무종류체크
@@ -52,7 +54,7 @@ try:
 
     #pandas를 이용하여 결과 excel에 출력
     df = pd.DataFrame(result,columns=['구분','견적요청번호','분류','견적요청건명','제출마감일시','견적서제출','발주기관','대표품목'])
-    df.to_excel(excel_writer = "D:\BID/bidlist_software.xlsx")
+    df.to_excel(excel_writer = "D:/BID/bidlist_software.xlsx")
     print("time :", time.time() - start) #현재시각 - 시작시간 
 
 except Exception as e:
